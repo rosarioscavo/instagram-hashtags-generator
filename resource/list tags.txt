@@ -1,0 +1,10 @@
+friends
+food
+animal
+sea
+sky
+nature
+street
+people
+car
+building
