@@ -37,6 +37,7 @@ STEP = 60
 NUM_VOCABULARY = 500
 
 global k_means
+# noinspection PyRedeclaration
 k_means = MiniBatchKMeans(NUM_VOCABULARY)
 warnings.filterwarnings("ignore")
 
@@ -372,7 +373,7 @@ def instagram_hashtags_generator(path_image, path_tags, classifier='lr + knn'):
                 knn_tags.append(tag_pred)
 
     if classifier == 'lr' or classifier == 'lr + knn':
-        print("lr: ",  ', '.join(lr_tags))
+        print("lr: ", ', '.join(lr_tags))
     if classifier == 'knn' or classifier == 'lr + knn':
         print("knn: ", ', '.join(knn_tags))
 
@@ -389,9 +390,9 @@ if __name__ == '__main__':
     # classifiers_creation(LIST_COMMON_TAGS_NAME)
     # show_performance_measures(LIST_COMMON_TAGS_NAME)
 
-    #knn, lr, lr + knn
+    # knn, lr, lr + knn
     classifier = 'lr + knn'
-    path_image='dataset/paint.jpg'
+    path_image = 'dataset/paint.jpg'
     instagram_hashtags_generator(path_image, LIST_COMMON_TAGS_NAME, classifier)
 
     end = time.time()
