@@ -42,22 +42,57 @@ k_means = MiniBatchKMeans(NUM_VOCABULARY)
 warnings.filterwarnings("ignore")
 
 
-# it shows an image in the default image viewer
 def show_image(image, tag):
+    """
+    Show an image in the default image viewer.
+
+    Parameters
+    ----------
+    image : str
+        Path to the image.
+    tag : str
+        Tag of the image.
+
+    Returns
+    -------
+    None
+    """
     plt.title(f"Tag: {tag}")
     plt.axis('off')
     plt.imshow(image)
     plt.show()
 
 
-# method to show the content of a DataFrame extending the columns
 def print_data(data):
+    """
+    Show the content of a DataFrame extending the columns.
+
+    Parameters
+    ----------
+    data : Dataframe
+        The dataframe to be shown.
+
+    Returns
+    -------
+    None
+    """
     with pd.option_context('display.max_rows', None, 'display.max_columns', None):
         print(data)
 
 
-# It removes some common tags that are considered useless
 def clean_tags(tags):
+    """
+    Remove some common tags that are considered useless.
+
+    Parameters
+    ----------
+    tags : List
+        List of tags.
+    Returns
+    -------
+    list
+        List of tags cleaned.
+    """
     stop_words = ['love', 'photography', 'instagood', 'travel', 'beautiful', 'style', 'follow', 'photooftheday',
                   'picoftheday', 'instagram', 'photo', 'naturephotography', 'life',
                   'instadaily', 'travelphotography']
@@ -65,9 +100,21 @@ def clean_tags(tags):
     return tags_cleaned
 
 
-# starting from a path to the data_set folder that contains some folders,
-# create a CSV with 3 columns(the path of the image, class and relative list of tags)
 def csv_creation(data_set_path, main_tags_path):
+    """
+    Create a CSV with 3 columns(the path of the image, class and relative list of tags).
+
+    Parameters
+    ----------
+    data_set_path : str
+        Path to the dataset.
+    main_tags_path : str
+        List to the main tags.
+
+    Returns
+    -------
+    None
+    """
     df = pd.DataFrame(columns=['path', 'class', 'tags'])
     target_flags = open(main_tags_path).read().splitlines()
 
@@ -112,22 +159,60 @@ def csv_creation(data_set_path, main_tags_path):
     df.to_csv(DATASET_NAME_CSV, index=False)
 
 
-# return a DataFrame filled by a CSV, located in the path
 def get_data_csv(path):
+    """
+    Return a DataFrame filled by a CSV, located in the path.
+
+    Parameters
+    ----------
+    path : str
+        Path to the file.
+
+    Returns
+    -------
+    pandas.core.frame.DataFrame
+        Dataframe with the content of the file
+    """
     data = pd.read_csv(path)
     return data
 
 
-# return a list of tags as a Series object
 def get_tags_from_csv(path_csv):
+    """
+    Return a list of tags as a Series object.
+
+    Parameters
+    ----------
+    path_csv : str
+        Path to a list of tags.
+
+    Returns
+    -------
+    pandas.core.series.Series
+        List of tags.
+    """
     data = get_data_csv(path_csv)
     return data['tags']
 
 
-# return a dictionary with the frequency of each tag in the tags Series. Each element of tags is a string of tags.
-# Using literal_eval it is possible to convert a string into a list obtaining a list of tags
 def tags_frequency(tags, num_tags):
+    """
+    Return a list of the most common tags.
+
+    Parameters
+    ----------
+    tags : pandas.core.series.Series
+        List of strings of tags.
+    num_tags : int
+        The number of most common tags to select.
+
+    Returns
+    -------
+    list
+        List of the most common tags.
+    """
     # Creating a list of tags using the list comprehension
+    # Using literal_eval it is possible to convert a string into a list obtaining a list of tags
     list_tags = [tag for index in range(0, len(tags)) for tag in literal_eval(tags[index])]
     counter = Counter(list_tags)
     most_common_counter = counter.most_common(num_tags)
@@ -135,26 +220,82 @@ def tags_frequency(tags, num_tags):
     return most_common_tags
 
 
-# It creates a file containing each tag in tags, one per line
 def create_file_most_common_tags(path, tags):
+    """
+    Create a file containing each tag in tags, one per line.
+
+    Parameters
+    ----------
+    path : str
+        Path to save the file.
+    tags : list
+        List of tags.
+
+    Returns
+    -------
+    None
+    """
     with open(path, "w") as output:
         for tag in tags:
             output.write(str(tag) + '\n')
 
 
-# It saves a .pkl file
 def save_object(path, data):
+    """
+    Save a .pkl file.
+
+    Parameters
+    ----------
+    path : str
+        Path to save the file.
+    data : Any
+        Data to be saved.
+
+    Returns
+    -------
+    None
+    """
     pickle.dump(data, open(path + '.pkl', "wb"))
 
 
-# It loads a .pkl file
 def load_object(path):
+    """
+    Load a .pkl file.
+
+    Parameters
+    ----------
+    path : str
+        Path of the .pkl file to be loaded.
+
+    Returns
+    -------
+    Any
+        Data of the .pkl file loaded.
+    """
     data = pickle.load(open(path + '.pkl', "rb"))
     return data
 
 
-# It creates a set for a tag in the file path_tags. The set's balance depends on the balance factor
+#
 def set_creation(data, tag, balance=1):
+    """
+    Create a Dataset for a tag. The set's balance depends on the balance factor.
+
+    Parameters
+    ----------
+    data : pandas.core.frame.DataFrame
+        Dataframe with the content of the file.
+    tag : str
+        The tag.
+    balance : int, optional
+        The balance factor.
+        It sets the percentage of the 'positive' and 'negative' classes.
+
+    Returns
+    -------
+    pandas.core.frame.DataFrame
+        The dataset of the specific tag.
+    """
     data_set = pd.DataFrame()
 
     # it shuffles the dataframe
@@ -182,8 +323,19 @@ def set_creation(data, tag, balance=1):
     return data_set
 
 
-# creating a training and testing sets for each tag in the file path_tags
 def training_testing_set_creation(path_tags):
+    """
+    Create a training and testing sets for each tag in the file path_tags.
+
+    Parameters
+    ----------
+    path_tags : str
+        Path to the file containing tags.
+
+    Returns
+    -------
+    None
+    """
     data = get_data_csv(DATASET_NAME_CSV)
     target_flags = open(path_tags).read().splitlines()
 
@@ -196,14 +348,41 @@ def training_testing_set_creation(path_tags):
         print(tag + ' completed')
 
 
-# it shows a pie with the percentage of each class in the data set
 def show_data_balance(data):
+    """
+    Show a pie with the percentage of each class in the dataset.
+
+    Parameters
+    ----------
+    data : pandas.core.frame.DataFrame
+        The dataset.
+
+    Returns
+    -------
+    None
+    """
     data.groupby('class')['class'].count().plot.pie(autopct='%.2f', subplots=True)
     plt.show()
 
 
-# it extracts and describes all the patches of the images in data using the dsift function
 def extract_and_describe(data, size=5, step=STEP):
+    """
+    Extract and describe all the patches of the images in data using the dsift function.
+
+    Parameters
+    ----------
+    data : pandas.core.frame.DataFrame
+        The dataset.
+    size : int
+         The size of the spatial bin of the SIFT descriptor in pixels.
+    step : int
+         A SIFT descriptor is extracted every ``step`` pixels.
+
+    Returns
+    -------
+    np.ndarray
+        Features of the dataset's images.
+    """
     descriptors = []
     for i, row in tqdm(data.iterrows(), "Extracting/Describing Patches", total=len(data)):
         path = DATA_SET_FOLDER + os.path.sep + row['path']
@@ -215,16 +394,49 @@ def extract_and_describe(data, size=5, step=STEP):
     return np.vstack(descriptors)
 
 
-# it describes an image and then return the bag of visual words
 def load_and_describe(filename, size=5, step=STEP):
+    """
+    Describe an image and then return the bag of visual words.
+
+    Parameters
+    ----------
+    filename : str
+        Path to an image.
+    size : int
+         The size of the spatial bin of the SIFT descriptor in pixels.
+    step : int
+         A SIFT descriptor is extracted every ``step`` pixels.
+
+    Returns
+    -------
+    list
+        List of the closest cluster for each descriptor.
+    """
     im = io.imread(filename, as_gray=True)
     _, descriptors = dsift(im, size=size, step=step, fast=True)
     tokens = k_means.predict(descriptors)
     return tokens
 
 
-# it creates and saves the bag of visual words for train and test sets applying tf-idf normalization
 def bovw_normalized_creation(train_descriptions, tag, train_set, test_set):
+    """
+    Create and save the bag of visual words for train and test sets applying the tf-idf normalization.
+
+    Parameters
+    ----------
+    train_descriptions : np.ndarray
+        Features of the dataset's images.
+    tag : str
+        The tag of the dataset's.
+    train_set : pandas.core.frame.DataFrame
+        The training set.
+    test_set : pandas.core.frame.DataFrame
+        The testing set.
+
+    Returns
+    -------
+    None
+    """
     # k_means needs to be fitted before executing load_and_describe function
     k_means.fit(train_descriptions)
     save_object(K_MEANS_FOLDER + os.path.sep + tag + '_kmeans', k_means)
@@ -240,15 +452,45 @@ def bovw_normalized_creation(train_descriptions, tag, train_set, test_set):
     save_object(TFIDF_FOLDER + os.path.sep + tag, tfidf)
 
 
-# fitting process for Nearest Neighbor
 def nearest_neighbor_fitting(x_train, y_train, k=1):
+    """
+    Fit process for Nearest Neighbor.
+
+    Parameters
+    ----------
+    x_train : pandas.core.series.Series
+        BoVWs of the training set.
+    y_train : pandas.core.series.Series
+        Classes of the training set.
+    k : int
+        Number of neighbors.
+
+    Returns
+    -------
+    KNeighborsClassifier
+        The fitted KNN model.
+    """
     knn = KNeighborsClassifier(n_neighbors=k)
     knn.fit(x_train, y_train)
     return knn
 
 
-# it calculates the best hyperparameter for K-nearest neighbors classifier
 def hyperparameter_optimization_knn(x_valid, y_valid):
+    """
+    Calculate the best hyperparameter for K-nearest neighbors classifier.
+
+    Parameters
+    ----------
+    x_valid : pandas.core.series.Series
+        BoVWs of the validation set
+    y_valid : pandas.core.series.Series
+        Classes label of the validation set.
+
+    Returns
+    -------
+    int
+        The best hyperparameter for K-nearest neighbors classifier.
+    """
     best_k = 1
     best_score = 0
     for k in range(1, 10):
@@ -262,23 +504,64 @@ def hyperparameter_optimization_knn(x_valid, y_valid):
     return best_k
 
 
-# fitting process for Logistic Regression
 def logistic_regression_fitting(x_train, y_train):
+    """
+    Fit process for Logistic Regression.
+
+    Parameters
+    ----------
+    x_train : pandas.core.series.Series
+        BoVWs of the training set.
+    y_train : pandas.core.series.Series
+        Classes label of the training set.
+
+    Returns
+    -------
+    LogisticRegression
+        The fitted Logistic Regression model.
+    """
     lr = LogisticRegression(multi_class='ovr', solver='sag')
     lr.fit(x_train, y_train)
     return lr
 
 
-# classifying the dataset(train and test set)
 def classification_process(classifier, x_train, x_test):
+    """
+    Classifies the dataset (train and test set).
+
+    Parameters
+    ----------
+    classifier : KNeighborsClassifier, LogisticRegression
+        The model of the classifier (knn or lr).
+    x_train : pandas.core.series.Series
+        BoVWs of the training set.
+    x_test : pandas.core.series.Series
+        BoVWs of the testing set.
+
+    Returns
+    -------
+    tuple
+        Return the predicted classes of the training and testing sets.
+
+    """
     y_train_pred = classifier.predict(x_train)
     y_test_pred = classifier.predict(x_test)
 
     return y_train_pred, y_test_pred
 
 
-# method to create all the files for the classifiers, for each tag
 def classifiers_creation(path_tags):
+    """
+    Method to create all the files for the classifiers for each tag.
+    Parameters
+    ----------
+    path_tags : str
+        Path to the file containing the tags of each classifier.
+
+    Returns
+    -------
+    None
+    """
     target_flags = open(path_tags).read().splitlines()
 
     for tag in target_flags:
@@ -308,8 +591,19 @@ def classifiers_creation(path_tags):
         print("tag: ", tag, " completed")
 
 
-# it creates a plot showing the performance measures of each classifier
 def show_performance_measures(path_tags):
+    """
+    It creates a plot showing the performance measures of each classifier.
+
+    Parameters
+    ----------
+    path_tags : str
+        Path to the file containing the tags of each classifier.
+
+    Returns
+    -------
+    None
+    """
     target_flags = open(path_tags).read().splitlines()
     measures = pd.DataFrame(columns=['Tag'])
     measures = measures.set_index('Tag')
@@ -337,8 +631,24 @@ def show_performance_measures(path_tags):
     plt.show()
 
 
-# it applies the binary classifier(relative to the tag) to the image
 def image_classification(path_image, tag, classifier):
+    """
+    It applies the binary classifier (relative to the tag) to an image.
+
+    Parameters
+    ----------
+    path_image : str
+        Path to the image.
+    tag : str
+        Tag for which the classification is going to be performed.
+    classifier : KNeighborsClassifier, LogisticRegression
+        The classifier (knn or lr) relative to the tag.
+
+    Returns
+    -------
+    str
+        The relative tag or None, depending on the classification process.
+    """
     tag_pred = None
     tfidf = load_object(TFIDF_FOLDER + os.path.sep + tag)
     feats = tfidf.transform(path_image)
@@ -350,9 +660,26 @@ def image_classification(path_image, tag, classifier):
     return tag_pred
 
 
-# it applies all the binary classifiers and returns a list of tags. It possible to apply at the same time lr and knn.
-# the classifier parameter can take the following value: 'lr', 'knn' and 'lr + knn', default value: 'lr + knn'
 def instagram_hashtags_generator(path_image, path_tags, classifier='lr + knn'):
+    """
+    It applies all the binary classifiers to an image and prints a list of tags. It possible to apply at the same time lr and knn.
+
+    Parameters
+    ----------
+    path_image : str
+        Path to the image.
+
+    path_tags : str
+        Path to the tags that will be analyzed.
+
+    classifier : str, optional
+        The classifiers that should be performed (the default value is 'lr + knn').
+        The accepted values are: 'lr', 'knn' and 'lr + knn'.
+
+    Returns
+    -------
+    """
+
     global k_means
     path_image = [path_image]
     knn_tags = []
@@ -392,7 +719,7 @@ if __name__ == '__main__':
 
     # knn, lr, lr + knn
     classifier = 'lr + knn'
-    path_image = 'dataset/paint.jpg'
+    path_image = 'images/paint.jpg'
     instagram_hashtags_generator(path_image, LIST_COMMON_TAGS_NAME, classifier)
 
     end = time.time()
